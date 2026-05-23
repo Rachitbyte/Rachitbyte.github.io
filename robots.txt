@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rachitbyte.github.io/sitemap.xml
