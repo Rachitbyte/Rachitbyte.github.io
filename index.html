@@ -2631,6 +2631,100 @@
                 transform: translateY(13px);
             }
         }
+        @media (max-width: 768px) {
+            /* 1. Terminal mockup (right side) */
+            .floating-terminal {
+                display: none !important;
+            }
+
+            /* 2. Hero layout */
+            .hero-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+            }
+
+            /* 3. Seeking Software Internship */
+            .hero-eyebrow {
+                max-width: 90vw !important;
+                text-align: center !important;
+                font-size: clamp(0.75rem, 3vw, 0.9rem) !important;
+                overflow: hidden !important;
+                white-space: nowrap !important;
+                text-overflow: ellipsis !important;
+                margin: 0 auto 1.5rem auto !important;
+                justify-content: center !important;
+            }
+
+            /* 4. Hero name */
+            .hero-name {
+                text-align: center !important;
+                font-size: clamp(3rem, 12vw, 5rem) !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+
+            /* 5. Typing subtitle */
+            .hero-typing {
+                justify-content: center !important;
+                text-align: center !important;
+                max-width: 90vw !important;
+                font-size: 0.85rem !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+
+            /* 6. CTA buttons */
+            .hero-cta {
+                flex-direction: column !important;
+                width: 100% !important;
+                align-items: stretch !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+            .hero-cta .btn-wrapper,
+            .hero-cta .btn {
+                width: 100% !important;
+            }
+
+            /* 7 & 8. Terminal window in intro & Intro text */
+            .loader-content {
+                position: absolute !important;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                max-width: 85vw !important;
+                width: 100% !important;
+                text-align: center !important;
+                font-size: 0.8rem !important;
+                padding: 0 5vw !important;
+                align-items: center !important;
+            }
+            .terminal-line {
+                justify-content: center !important;
+            }
+
+            /* 10. All sections padding */
+            .section {
+                padding: 4rem 5vw !important;
+            }
+
+            /* 11. Project cards */
+            .project-cards {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* 12. Stats grid */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            /* 13. Touch targets */
+            .btn, .nav-links a, .social-link {
+                min-height: 44px !important;
+            }
+        }
     </style>
 </head>
 
