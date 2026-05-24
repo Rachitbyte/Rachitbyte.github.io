@@ -4037,33 +4037,62 @@
             dashObserver.observe(dashFocus);
         }
 
-        // Skill Bars Hover Counter
+        // Skill Bars Scroll Counter
         const skillWraps = document.querySelectorAll('.skill-bar-wrap');
-        skillWraps.forEach(wrap => {
+        
+        const skillObserverOptions = {
+            root: null,
+            rootMargin: '-50px',
+            threshold: 0.1
+        };
+
+        const skillObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    const wrap = entry.target;
+                    triggerSkillCount(wrap, index);
+                    observer.unobserve(wrap);
+                }
+            });
+        }, skillObserverOptions);
+
+        function triggerSkillCount(wrap, index = 0) {
+            if (wrap.dataset.counted === 'true') return;
+            wrap.dataset.counted = 'true';
+
             const valEl = wrap.querySelector('.skill-pct-val');
             if (!valEl) return;
-            const targetVal = valEl.getAttribute('data-val');
-            let hasCounted = false;
 
-            wrap.addEventListener('mouseenter', () => {
-                if (hasCounted) return;
-                hasCounted = true;
+            const targetVal = parseInt(valEl.getAttribute('data-val')) || 0;
+            const duration = 1200; // 1200ms smooth count
 
-                let start = 0;
-                const target = parseInt(targetVal);
-                const increment = Math.ceil(target / 40);
-
-                function countInt() {
-                    start += increment;
-                    if (start >= target) {
-                        valEl.textContent = target + '%';
+            setTimeout(() => {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = timestamp - startTimestamp;
+                    const current = Math.min(Math.floor((progress / duration) * targetVal), targetVal);
+                    
+                    valEl.textContent = current + '%';
+                    
+                    if (progress < duration) {
+                        requestAnimationFrame(step);
                     } else {
-                        valEl.textContent = start + '%';
-                        requestAnimationFrame(countInt);
+                        valEl.textContent = targetVal + '%';
                     }
-                }
-                countInt();
-            });
+                };
+                requestAnimationFrame(step);
+            }, index * 100); // 100ms stagger
+        }
+
+        skillWraps.forEach((wrap, i) => {
+            // Force immediate execution if element is already visible on page load
+            const rect = wrap.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom >= 0) {
+                triggerSkillCount(wrap, i);
+            } else {
+                skillObserver.observe(wrap);
+            }
         });
 
 
