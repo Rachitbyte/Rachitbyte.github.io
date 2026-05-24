@@ -2193,10 +2193,16 @@
 
         .skill-fill {
             height: 100%;
-            width: 0;
+            width: 0%; /* Set dynamically via JS before animation */
+            transform: scaleX(0);
+            transform-origin: left;
             background: linear-gradient(90deg, #1a2000, var(--accent));
             border-radius: 4px;
-            transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
+            transition: transform 1800ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+        }
+
+        .skill-bar-wrap.animated .skill-fill {
+            transform: scaleX(1);
         }
 
         .skill-bar-wrap:hover .skill-fill {
@@ -4037,63 +4043,73 @@
             dashObserver.observe(dashFocus);
         }
 
-        // Skill Bars Scroll Counter
+        // Skill Bars Scroll Counter & Fill Animation
+        const skillContainer = document.querySelector('.skill-bars-container');
         const skillWraps = document.querySelectorAll('.skill-bar-wrap');
         
         const skillObserverOptions = {
             root: null,
-            rootMargin: '-50px',
-            threshold: 0.1
+            rootMargin: '0px',
+            threshold: 0.2
         };
 
+        // Cubic ease-out for smooth numbers
+        const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+
         const skillObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach((entry, index) => {
+            entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    const wrap = entry.target;
-                    triggerSkillCount(wrap, index);
-                    observer.unobserve(wrap);
+                    const container = entry.target;
+                    if (container.classList.contains('animated')) return;
+                    container.classList.add('animated');
+                    
+                    skillWraps.forEach((wrap, index) => {
+                        const valEl = wrap.querySelector('.skill-pct-val');
+                        const fillEl = wrap.querySelector('.skill-fill');
+                        if (!valEl || !fillEl) return;
+
+                        const targetVal = parseInt(valEl.getAttribute('data-val')) || 0;
+                        
+                        // Set actual width so scaleX(1) expands correctly
+                        fillEl.style.width = targetVal + '%';
+                        fillEl.style.transitionDelay = (index * 150) + 'ms';
+
+                        // Trigger CSS bar fill animation
+                        requestAnimationFrame(() => {
+                            wrap.classList.add('animated');
+                        });
+
+                        const duration = 1500; // 1500ms smooth count
+
+                        // Start number count up alongside bar fill
+                        setTimeout(() => {
+                            let startTimestamp = null;
+                            const step = (timestamp) => {
+                                if (!startTimestamp) startTimestamp = timestamp;
+                                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                                const easedProgress = easeOut(progress);
+                                
+                                const current = Math.floor(easedProgress * targetVal);
+                                valEl.textContent = current + '%';
+                                
+                                if (progress < 1) {
+                                    requestAnimationFrame(step);
+                                } else {
+                                    valEl.textContent = targetVal + '%';
+                                }
+                            };
+                            requestAnimationFrame(step);
+                        }, index * 150); // 150ms stagger
+                    });
+                    
+                    observer.unobserve(container);
                 }
             });
         }, skillObserverOptions);
 
-        function triggerSkillCount(wrap, index = 0) {
-            if (wrap.dataset.counted === 'true') return;
-            wrap.dataset.counted = 'true';
-
-            const valEl = wrap.querySelector('.skill-pct-val');
-            if (!valEl) return;
-
-            const targetVal = parseInt(valEl.getAttribute('data-val')) || 0;
-            const duration = 1200; // 1200ms smooth count
-
-            setTimeout(() => {
-                let startTimestamp = null;
-                const step = (timestamp) => {
-                    if (!startTimestamp) startTimestamp = timestamp;
-                    const progress = timestamp - startTimestamp;
-                    const current = Math.min(Math.floor((progress / duration) * targetVal), targetVal);
-                    
-                    valEl.textContent = current + '%';
-                    
-                    if (progress < duration) {
-                        requestAnimationFrame(step);
-                    } else {
-                        valEl.textContent = targetVal + '%';
-                    }
-                };
-                requestAnimationFrame(step);
-            }, index * 100); // 100ms stagger
+        if (skillContainer) {
+            skillObserver.observe(skillContainer);
         }
-
-        skillWraps.forEach((wrap, i) => {
-            // Force immediate execution if element is already visible on page load
-            const rect = wrap.getBoundingClientRect();
-            if (rect.top < window.innerHeight && rect.bottom >= 0) {
-                triggerSkillCount(wrap, i);
-            } else {
-                skillObserver.observe(wrap);
-            }
-        });
 
 
     </script>
